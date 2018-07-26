@@ -38,7 +38,7 @@ styles = {
     }
 }
 file="realtime.txt"
-#real_df=pd.read_csv(file)
+real_df=pd.read_csv(file)
 X1=deque(maxlen=20)
 Y1=deque(maxlen=20)
 X1.append(1)
@@ -49,6 +49,10 @@ Y3=deque(maxlen=20)
 Y3.append(1)
 Y4=deque(maxlen=20)
 Y4.append(1)
+Y5=deque(maxlen=20)
+Y5.append(1)
+Y6=deque(maxlen=20)
+Y6.append(1)
 #print(real_df['pplIn'].values)
 # HTML layout
 app.layout = html.Div(children=[
@@ -133,9 +137,10 @@ app.layout = html.Div(children=[
                                 interval=1000,
                                 )
 
-                            ],style={'marginBottom': 50, 'marginTop': 50,'border': '2px solid black'},className='eight columns'
-                             ),
-                    ],className='ten columns offset-by-one',style={ },) #"background-color":"powderblue"
+                            ],style={'marginBottom': 50, 'marginTop': 50,'border': '2px solid black'},className='eight columns') ,
+
+
+                    ],className='ten columns offset-by-one',style={"background-color":"white"},) #"background-color":"powderblue"
 
 
 @app.callback(
@@ -149,10 +154,7 @@ def plot(cam,picdate,tvalue):
         detect=['ppl In','ppl Out']
     elif cam == 'C3':
         detect=['total cars atm','Total people atm']
-    # elif cam=='R':
-    #     detect=['pplIn','pplOut','carsIn','carsOut']
 
-    print(tvalue)
     filtered_df=df[(df['Date']==picdate)&(df['temptime']>=tvalue[0])&(df['temptime']<=tvalue[1])]
     # if cam=='R' :
     #     for each in detect :
@@ -196,42 +198,73 @@ def realtimegraph(cam):
     global Y2
     global Y3
     global Y4
+    global Y5
+    global Y6
     X1.append(X1[-1]+1)
-    real_df=pd.read_csv(file,names=['pplIn','pplOut','carsIn','carsOut'])
+    real_df=pd.read_csv(file,names=['pplIn','pplOut','carsIn','carsOut','pplat','carsat'])
     Y1.append(real_df['pplIn'].values[-1])
     Y2.append(real_df['pplOut'].values[-1])
     Y3.append(real_df['carsIn'].values[-1])
     Y4.append(real_df['carsOut'].values[-1])
-    if cam!='R':
-          data=[]
-          fig={}
-    else:
-        data= [{"x":list(X1),"y":list(Y1),"name":'ppl In',"type":'line'},
-                {"x":list(X1),"y":list(Y2),"name":'ppl Out',"type":'line'},
-                {"x":list(X1),"y":list(Y3),"name":'cars In',"type":'line'},
-                {"x":list(X1),"y":list(Y4),"name":'cars Out',"type":'line'},
-              ]
+    Y5.append(real_df['pplat'].values[-1])
+    Y6.append(real_df['carsat'].values[-1])
 
-        fig= {"data":data ,
-              "layout" : {
-              'title':"Real Time Data",
-              "xaxis":dict(range=[min(X1),max(X1)],
-                          gridcolor='rgb(255,255,255)',
-                          title='Time(in seconds)',
-                          titlefont=dict(
-                          family='Courier New, monospace',
-                          size=20,
-                          color='#008000'
-          )), "yaxis":dict(range=[0,10],
-                          gridcolor='rgb(255,255,255)',
-                          title='Number (count)',
-                          titlefont=dict(
-                          family='Helvetica, monospace',
-                          size=20,
-                          color='#008000'
-                    )),
-                          },
-            }
+    if cam=='C1':
+          name=[]
+          name=['In','Out']
+          titl="Real Time Data of Cars going in and out"
+          data=[{"x":list(X1),"y":list(Y3),"name":name[0],"type":'line'},
+          {"x":list(X1),"y":list(Y4),"name":name[1],"type":'line'},]
+          name=[]
+
+    elif cam=='C2':
+        name=[]
+        name=['In','Out']
+        titl="Real Time Data of People going in and out"
+        data=[{"x":list(X1),"y":list(Y1),"name":name[0],"type":'line'},
+                {"x":list(X1),"y":list(Y2),"name":name[1],"type":'line'}]
+        name=[]
+
+    elif cam =='C3':
+
+        titl="Real Time Data of People and cars at the gate"
+        data=[{"x":list(X1),"y":list(Y5),"name":"ppl at gate","type":'line'},
+                {"x":list(X1),"y":list(Y6),"name":"cars at gate","type":'line'}]
+
+
+    else:
+        titl="Real Time Data"
+        name=[]
+        name=['pplIn','pplOut','carsIn','carsOut']
+        data= [{"x":list(X1),"y":list(Y1),"name":name[0],"type":'line'},
+                {"x":list(X1),"y":list(Y2),"name":name[1],"type":'line'},
+                {"x":list(X1),"y":list(Y3),"name":name[2],"type":'line'},
+                {"x":list(X1),"y":list(Y4),"name":name[3],"type":'line'},
+              ]
+        name=[]
+
+
+    fig= {"data":data ,
+          "layout" : {
+          "title":titl,
+          "xaxis":dict(range=[min(X1),max(X1)],
+                      gridcolor='rgb(255,255,255)',
+                      title='Time(in seconds)',
+                      titlefont=dict(
+                      family='Courier New, monospace',
+                      size=20,
+                      color='#008000'
+      )), "yaxis":dict(range=[0,10],
+                      gridcolor='rgb(255,255,255)',
+                      title='Number (count)',
+                      titlefont=dict(
+                      family='Helvetica, monospace',
+                      size=20,
+                      color='#008000'
+                )),
+            'plot_bgcolor':'rgb(229,229,229)',
+                      },
+        }
 
 
     return fig
